@@ -11,6 +11,7 @@
 
 */
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -44,9 +45,9 @@ typedef struct de_entity_ver { uint32_t ver; } de_entity_ver;
 typedef struct de_entity_id { uint32_t id; } de_entity_id;
 
 /* Masks for retrieving the id and the version of an entity */
-#define DE_ENTITY_ID_MASK       ((uint32_t)0xFFFFF) /* Mask to use to get the entity number out of an identifier.*/  
+#define DE_ENTITY_ID_MASK       ((uint32_t)0xFFFFF) /* Mask to use to get the entity number out of an identifier.*/
 #define DE_ENTITY_VERSION_MASK  ((uint32_t)0xFFF)   /* Mask to use to get the version out of an identifier. */
-#define DE_ENTITY_SHIFT         ((size_t)20)        /* Extent of the entity number within an identifier. */   
+#define DE_ENTITY_SHIFT         ((size_t)20)        /* Extent of the entity number within an identifier. */
 
 /* The de_null is a de_entity that represents a null entity. */
 extern const de_entity de_null;
@@ -253,7 +254,7 @@ void de_view_next(de_view* v);
 /*
  TODO LIST:
     - Context variables (those are like global variables) but are inside the registry, malloc/freed inside the registry.
-    - Try to make the API simpler  for single/multi views. 
+    - Try to make the API simpler  for single/multi views.
     (de_it_start, de_it_next, de_it_valid
     (de_multi_start, de_multi_next, de_multi_valid,)
     - Callbacks on component insertions/deletions/updates
@@ -487,7 +488,7 @@ static void* de_storage_emplace(de_storage* s, de_entity e) {
 
     // return the component data pointer (last position)
     void* cp_data_ptr = &((char*)s->cp_data)[(s->cp_data_size - 1) * sizeof(char) * s->cp_sizeof];
-    
+
     // then add the entity to the sparse set
     de_sparse_emplace(&s->sparse, e);
 
@@ -556,7 +557,7 @@ de_ecs* de_ecs_make() {
         r->entities = 0;
     }
     return r;
-} 
+}
 
 void de_ecs_destroy(de_ecs* r) {
     if (r) {
@@ -589,7 +590,7 @@ static de_entity _de_generate_entity(de_ecs* r) {
     const de_entity e = de_make_entity((de_entity_id) {(uint32_t)r->entities_size}, (de_entity_ver) { 0 });
     r->entities[r->entities_size] = e;
     r->entities_size++;
-    
+
     return e;
 }
 
@@ -648,7 +649,7 @@ de_storage* de_assure(de_ecs* r, de_cp_type cp_type) {
 void de_remove_all(de_ecs* r, de_entity e) {
     assert(r);
     assert(de_valid(r, e));
-    
+
     for (size_t i = r->storages_size; i; --i) {
         if (r->storages[i - 1] && de_sparse_contains(&r->storages[i - 1]->sparse, e)) {
             de_storage_remove(r->storages[i - 1], e);
@@ -765,7 +766,7 @@ de_view_single de_create_view_single(de_ecs* r, de_cp_type cp_type) {
     de_storage* pool = (de_storage *)v.pool;
     if (pool->cp_data_size != 0) {
         // get the last entity of the pool
-        v.current_entity_index = pool->cp_data_size - 1; 
+        v.current_entity_index = pool->cp_data_size - 1;
         v.entity = pool->sparse.dense[v.current_entity_index];
     } else {
         v.current_entity_index = 0;
@@ -807,8 +808,8 @@ bool de_view_entity_contained(de_view* v, de_entity e) {
     assert(de_view_valid(v));
 
     for (size_t pool_id = 0; pool_id < v->pool_count; pool_id++) {
-        if (!de_storage_contains(v->all_pools[pool_id], e)) { 
-            return false; 
+        if (!de_storage_contains(v->all_pools[pool_id], e)) {
+            return false;
         }
     }
     return true;
@@ -855,11 +856,11 @@ void de_view_next(de_view* v) {
 de_view de_create_view(de_ecs* r, size_t cp_count, de_cp_type *cp_types) {
     assert(r);
     assert(cp_count < DE_MAX_VIEW_COMPONENTS);
-    
+
 
     de_view v = { 0 };
     v.pool_count = cp_count;
-    // setup pools pointer and find the smallest pool that we 
+    // setup pools pointer and find the smallest pool that we
     // use for iterations
     for (size_t i = 0; i < cp_count; i++) {
         v.all_pools[i] = de_assure(r, cp_types[i]);
