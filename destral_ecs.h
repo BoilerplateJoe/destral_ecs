@@ -201,6 +201,8 @@ typedef struct de_view_single {
     de_entity entity;
 } de_view_single;
 
+#define DE_MAKE_SINGLE_VIEW(REGISTRY, VAR, CP) de_view_single VAR = de_create_view_single(REGISTRY, CP); de_view_single_valid(&VAR); de_view_single_next(&VAR)
+
 de_view_single de_create_view_single(de_ecs* r, de_cp_type cp_type);
 bool de_view_single_valid(de_view_single* v);
 de_entity de_view_single_entity(de_view_single* v);
@@ -239,6 +241,8 @@ typedef struct de_view {
     size_t current_entity_index;
     de_entity current_entity;
 } de_view;
+
+#define DE_MAKE_VIEW(REGISTRY, VAR, CP_COUNT, ...) de_view VAR = de_create_view(REGISTRY, CP_COUNT, (de_cp_type[CP_COUNT]) {__VA_ARGS__}); de_view_valid(&VAR); de_view_next(&VAR)
 
 
 de_view de_create_view(de_ecs* r, size_t cp_count, de_cp_type* cp_types);
