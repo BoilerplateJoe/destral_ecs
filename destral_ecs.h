@@ -79,6 +79,15 @@ de_ecs* de_ecs_make();
 /*  Deinitializes and frees a de_ecs context */
 void de_ecs_destroy(de_ecs* r);
 
+/*  Allocates context memory in a de_ecs context */
+void* de_context_make(de_ecs* r, size_t sz);
+
+/*  Returns context memory from a de_ecs context */
+void* de_context_get(de_ecs* r);
+
+/*  Frees context memory from a de_ecs context */
+void de_context_destroy(de_ecs* r);
+
 /*
     Creates a new entity and returns it
     The identifier can be:
@@ -549,6 +558,8 @@ typedef struct de_ecs {
     size_t entities_size;
     de_entity* entities; /* contains all the created entities */
     de_entity_id available_id; /* first index in the list to recycle */
+    void* context;
+    size_t context_size; /* Size of the struct  */
 } de_ecs;
 
 de_ecs* de_ecs_make() {
@@ -559,6 +570,8 @@ de_ecs* de_ecs_make() {
         r->available_id.id = de_null;
         r->entities_size = 0;
         r->entities = 0;
+        r->context = NULL;
+        r->context_size = 0;
     }
     return r;
 }
@@ -571,8 +584,34 @@ void de_ecs_destroy(de_ecs* r) {
             }
         }
         free(r->entities);
+
+        de_context_destroy(r);
     }
     free(r);
+}
+
+void* de_context_make(de_ecs* r, size_t sz) {
+	assert(r);
+	r->context = malloc(sz);
+	if(r->context) {
+		r->context_size = sz;
+	} else {
+		r->context_size = 0;
+	}
+	return r->context;
+}
+
+void* de_context_get(de_ecs* r) {
+	assert(r);
+	return r->context;
+}
+
+void de_context_destroy(de_ecs* r) {
+	assert(r);
+	if(r->context) {
+		free(r->context);
+		r->context_size = 0;
+	}
 }
 
 
